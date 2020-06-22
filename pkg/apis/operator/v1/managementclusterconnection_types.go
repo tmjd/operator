@@ -31,6 +31,7 @@ type ManagementClusterConnectionSpec struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +genclient
 // +genclient:nonNamespaced
+// +enterprise
 
 // ManagementClusterConnection represents a link between a managed cluster and a management cluster. At most one
 // instance of this resource is supported. It must be named "tigera-secure".

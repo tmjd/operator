@@ -70,6 +70,7 @@ type AmazonCloudIntegrationStatus struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +genclient
 // +genclient:nonNamespaced
+// +enterprise
 
 // AmazonCloudIntegration is the Schema for the amazoncloudintegrations API
 // +k8s:openapi-gen=true
