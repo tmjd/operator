@@ -21,13 +21,10 @@ import (
 	"hash/fnv"
 	"strings"
 
-	"github.com/elastic/cloud-on-k8s/pkg/utils/stringsutil"
-
 	cmnv1 "github.com/elastic/cloud-on-k8s/pkg/apis/common/v1"
 	esv1 "github.com/elastic/cloud-on-k8s/pkg/apis/elasticsearch/v1"
 	kbv1 "github.com/elastic/cloud-on-k8s/pkg/apis/kibana/v1"
-	operatorv1 "github.com/tigera/operator/api/v1"
-	"github.com/tigera/operator/pkg/components"
+	"github.com/elastic/cloud-on-k8s/pkg/utils/stringsutil"
 	"gopkg.in/inf.v0"
 	admissionv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -38,8 +35,11 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	operatorv1 "github.com/tigera/operator/api/v1"
+	"github.com/tigera/operator/pkg/components"
 )
 
 const (
@@ -204,8 +204,8 @@ func (es *elasticsearchComponent) SupportedOSType() OSType {
 	return OSTypeLinux
 }
 
-func (es *elasticsearchComponent) Objects() ([]runtime.Object, []runtime.Object) {
-	var toCreate, toDelete []runtime.Object
+func (es *elasticsearchComponent) Objects() ([]client.Object, []client.Object) {
+	var toCreate, toDelete []client.Object
 
 	if es.logStorage != nil {
 		if !stringsutil.StringInSlice(LogStorageFinalizer, es.logStorage.GetFinalizers()) {

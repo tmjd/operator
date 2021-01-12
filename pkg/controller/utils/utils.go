@@ -21,9 +21,6 @@ import (
 	"github.com/tigera/operator/pkg/oidc"
 
 	"github.com/go-logr/logr"
-	v3 "github.com/tigera/api/pkg/apis/projectcalico/v3"
-	operatorv1 "github.com/tigera/operator/api/v1"
-	"github.com/tigera/operator/pkg/render"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -36,6 +33,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	v3 "github.com/tigera/api/pkg/apis/projectcalico/v3"
+	operatorv1 "github.com/tigera/operator/api/v1"
+	"github.com/tigera/operator/pkg/render"
 )
 
 const (
@@ -50,7 +51,7 @@ var DefaultInstanceKey = client.ObjectKey{Name: "default"}
 var DefaultTSEEInstanceKey = client.ObjectKey{Name: "tigera-secure"}
 
 // ContextLoggerForResource provides a logger instance with context set for the provided object.
-func ContextLoggerForResource(log logr.Logger, obj runtime.Object) logr.Logger {
+func ContextLoggerForResource(log logr.Logger, obj client.Object) logr.Logger {
 	gvk := obj.GetObjectKind().GroupVersionKind()
 	name := obj.(metav1.ObjectMetaAccessor).GetObjectMeta().GetName()
 	namespace := obj.(metav1.ObjectMetaAccessor).GetObjectMeta().GetNamespace()
@@ -117,29 +118,29 @@ func AddServiceWatch(c controller.Controller, name, namespace string) error {
 // addWatch creates a watch on the given object. If a name and namespace are provided, then it will
 // use predicates to only return matching objects. If they are not, then all events of the provided kind
 // will be generated.
-func addNamespacedWatch(c controller.Controller, obj runtime.Object, metaMatches ...MetaMatch) error {
+func addNamespacedWatch(c controller.Controller, obj client.Object, metaMatches ...MetaMatch) error {
 	objMeta := obj.(metav1.ObjectMetaAccessor).GetObjectMeta()
 	if objMeta.GetNamespace() == "" {
 		return fmt.Errorf("No namespace provided for namespaced watch")
 	}
 	pred := predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			if objMeta.GetName() != "" && e.Meta.GetName() != objMeta.GetName() {
+			if objMeta.GetName() != "" && e.Object.GetName() != objMeta.GetName() {
 				return false
 			}
-			return e.Meta.GetNamespace() == objMeta.GetNamespace()
+			return e.Object.GetNamespace() == objMeta.GetNamespace()
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			if objMeta.GetName() != "" && e.MetaNew.GetName() != objMeta.GetName() {
+			if objMeta.GetName() != "" && e.ObjectNew.GetName() != objMeta.GetName() {
 				return false
 			}
-			return e.MetaNew.GetNamespace() == objMeta.GetNamespace()
+			return e.ObjectNew.GetNamespace() == objMeta.GetNamespace()
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			if objMeta.GetName() != "" && e.Meta.GetName() != objMeta.GetName() {
+			if objMeta.GetName() != "" && e.Object.GetName() != objMeta.GetName() {
 				return false
 			}
-			return e.Meta.GetNamespace() == objMeta.GetNamespace()
+			return e.Object.GetNamespace() == objMeta.GetNamespace()
 		},
 	}
 	return c.Watch(&source.Kind{Type: obj}, &handler.EnqueueRequestForObject{}, pred)

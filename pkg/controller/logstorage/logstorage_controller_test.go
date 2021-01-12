@@ -155,7 +155,7 @@ var _ = Describe("LogStorage controller", func() {
 						r, err := logstorage.NewReconcilerWithShims(cli, scheme, mockStatus, operatorv1.ProviderNone, "")
 						Expect(err).ShouldNot(HaveOccurred())
 
-						_, err = r.Reconcile(reconcile.Request{})
+						_, err = r.Reconcile(context.TODO(), reconcile.Request{})
 						Expect(err).ShouldNot(HaveOccurred())
 
 						svc := &corev1.Service{}
@@ -175,8 +175,7 @@ var _ = Describe("LogStorage controller", func() {
 
 						r, err := logstorage.NewReconcilerWithShims(cli, scheme, mockStatus, operatorv1.ProviderNone, resolvConfPath)
 						Expect(err).ShouldNot(HaveOccurred())
-
-						_, err = r.Reconcile(reconcile.Request{})
+						_, err = r.Reconcile(context.TODO(), reconcile.Request{})
 						Expect(err).ShouldNot(HaveOccurred())
 
 						svc := &corev1.Service{}
@@ -199,7 +198,7 @@ var _ = Describe("LogStorage controller", func() {
 						r, err := logstorage.NewReconcilerWithShims(cli, scheme, mockStatus, operatorv1.ProviderNone, "")
 						Expect(err).ShouldNot(HaveOccurred())
 						mockStatus.On("SetDegraded", "LogStorage validation failed", "cluster type is managed but LogStorage CR still exists").Return()
-						result, err := r.Reconcile(reconcile.Request{})
+						result, err := r.Reconcile(context.TODO(), reconcile.Request{})
 						Expect(result).Should(Equal(reconcile.Result{}))
 						Expect(err).ShouldNot(HaveOccurred())
 
@@ -224,7 +223,7 @@ var _ = Describe("LogStorage controller", func() {
 						ls.SetFinalizers([]string{"tigera.io/eck-cleanup"})
 						Expect(cli.Update(ctx, ls)).ShouldNot(HaveOccurred())
 
-						result, err := r.Reconcile(reconcile.Request{})
+						result, err := r.Reconcile(context.TODO(), reconcile.Request{})
 						Expect(err).ShouldNot(HaveOccurred())
 						Expect(result).Should(Equal(reconcile.Result{}))
 
@@ -240,7 +239,7 @@ var _ = Describe("LogStorage controller", func() {
 						Expect(cli.Get(ctx, utils.DefaultTSEEInstanceKey, ls)).ShouldNot(HaveOccurred())
 						Expect(ls.Finalizers).Should(ContainElement("tigera.io/eck-cleanup"))
 
-						result, err = r.Reconcile(reconcile.Request{})
+						result, err = r.Reconcile(context.TODO(), reconcile.Request{})
 						Expect(err).ShouldNot(HaveOccurred())
 						Expect(result).Should(Equal(reconcile.Result{}))
 
@@ -308,7 +307,7 @@ var _ = Describe("LogStorage controller", func() {
 					Expect(err).ShouldNot(HaveOccurred())
 
 					mockStatus.On("SetDegraded", "Waiting for Elasticsearch cluster to be operational", "").Return()
-					result, err := r.Reconcile(reconcile.Request{})
+					result, err := r.Reconcile(context.TODO(), reconcile.Request{})
 					Expect(err).ShouldNot(HaveOccurred())
 					// Expect to be waiting for Elasticsearch and Kibana to be functional
 					Expect(result).Should(Equal(reconcile.Result{}))
@@ -337,14 +336,14 @@ var _ = Describe("LogStorage controller", func() {
 					Expect(cli.Create(ctx, &corev1.Secret{ObjectMeta: kbPublicCertObjMeta})).ShouldNot(HaveOccurred())
 
 					mockStatus.On("SetDegraded", "Waiting for curator secrets to become available", "").Return()
-					result, err = r.Reconcile(reconcile.Request{})
+					result, err = r.Reconcile(context.TODO(), reconcile.Request{})
 					Expect(err).ShouldNot(HaveOccurred())
 					// Expect to be waiting for curator secret
 					Expect(result).Should(Equal(reconcile.Result{}))
 					Expect(cli.Create(ctx, &corev1.Secret{ObjectMeta: curatorUsrSecretObjMeta})).ShouldNot(HaveOccurred())
 
 					mockStatus.On("ClearDegraded")
-					result, err = r.Reconcile(reconcile.Request{})
+					result, err = r.Reconcile(context.TODO(), reconcile.Request{})
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(result).Should(Equal(reconcile.Result{}))
 
@@ -395,7 +394,7 @@ var _ = Describe("LogStorage controller", func() {
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("making sure LogStorage has successfully reconciled")
-					result, err := r.Reconcile(reconcile.Request{})
+					result, err := r.Reconcile(context.TODO(), reconcile.Request{})
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(result).Should(Equal(reconcile.Result{}))
 
@@ -410,7 +409,7 @@ var _ = Describe("LogStorage controller", func() {
 					Expect(cli.Update(ctx, ls)).ShouldNot(HaveOccurred())
 					Expect(ls.Spec.StorageClassName).To(Equal(logstorage.DefaultElasticsearchStorageClass))
 
-					result, err = r.Reconcile(reconcile.Request{})
+					result, err = r.Reconcile(context.TODO(), reconcile.Request{})
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(result).Should(Equal(reconcile.Result{}))
 
@@ -427,7 +426,7 @@ var _ = Describe("LogStorage controller", func() {
 					Expect(ls.Finalizers).Should(ContainElement("tigera.io/eck-cleanup"))
 
 					mockStatus.On("SetDegraded", "Waiting for Elasticsearch cluster to be operational", "")
-					result, err = r.Reconcile(reconcile.Request{})
+					result, err = r.Reconcile(context.TODO(), reconcile.Request{})
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(result).Should(Equal(reconcile.Result{}))
 

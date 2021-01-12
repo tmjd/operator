@@ -105,7 +105,7 @@ var _ = Describe("Compliance controller tests", func() {
 	It("should create resources for standalone clusters", func() {
 
 		By("reconciling when clustertype is Standalone")
-		result, err := r.Reconcile(reconcile.Request{})
+		result, err := r.Reconcile(context.TODO(), reconcile.Request{})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result.Requeue).NotTo(BeTrue())
 
@@ -138,7 +138,7 @@ var _ = Describe("Compliance controller tests", func() {
 	It("should remove the compliance server in managed clusters", func() {
 
 		By("reconciling when clustertype is Standalone")
-		result, err := r.Reconcile(reconcile.Request{})
+		result, err := r.Reconcile(context.TODO(), reconcile.Request{})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result.Requeue).NotTo(BeTrue())
 
@@ -158,7 +158,7 @@ var _ = Describe("Compliance controller tests", func() {
 			})).NotTo(HaveOccurred())
 
 		By("reconciling after the cluster type changes")
-		_, err = r.Reconcile(reconcile.Request{})
+		_, err = r.Reconcile(context.TODO(), reconcile.Request{})
 		Expect(err).NotTo(HaveOccurred())
 
 		By("removing one unnecessary deployment")

@@ -16,7 +16,7 @@ package render
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func ConfigMaps(cms []*corev1.ConfigMap) Component {
@@ -31,8 +31,8 @@ func (c *configMapComponent) SupportedOSType() OSType {
 	return OSTypeAny
 }
 
-func (c *configMapComponent) Objects() ([]runtime.Object, []runtime.Object) {
-	objs := []runtime.Object{}
+func (c *configMapComponent) Objects() ([]client.Object, []client.Object) {
+	objs := []client.Object{}
 	for _, cm := range c.configMaps {
 		objs = append(objs, cm)
 	}

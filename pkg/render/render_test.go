@@ -19,17 +19,16 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/tigera/operator/pkg/common"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	zap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	operator "github.com/tigera/operator/api/v1"
+	"github.com/tigera/operator/pkg/common"
 	"github.com/tigera/operator/pkg/render"
-	zap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var _ = Describe("Rendering tests", func() {
@@ -66,7 +65,7 @@ var _ = Describe("Rendering tests", func() {
 		}
 
 		logWriter = bufio.NewWriter(&logBuffer)
-		render.SetTestLogger(zap.LoggerTo(logWriter, true))
+		render.SetTestLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(logWriter)))
 		typhaNodeTLS = &render.TyphaNodeTLS{}
 	})
 	AfterEach(func() {
@@ -155,7 +154,7 @@ var _ = Describe("Rendering tests", func() {
 			{"calico-kube-controllers", "", "policy", "v1beta1", "PodSecurityPolicy"},
 		}
 
-		var resources []runtime.Object
+		var resources []client.Object
 		for _, component := range c.Render() {
 			var toCreate, _ = component.Objects()
 			resources = append(resources, toCreate...)

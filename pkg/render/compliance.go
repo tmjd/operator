@@ -18,16 +18,17 @@ import (
 	"fmt"
 
 	ocsv1 "github.com/openshift/api/security/v1"
-	v3 "github.com/tigera/api/pkg/apis/projectcalico/v3"
-	operatorv1 "github.com/tigera/operator/api/v1"
-	"github.com/tigera/operator/pkg/components"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	v3 "github.com/tigera/api/pkg/apis/projectcalico/v3"
+	operatorv1 "github.com/tigera/operator/api/v1"
+	"github.com/tigera/operator/pkg/components"
 )
 
 const (
@@ -110,9 +111,9 @@ func (c *complianceComponent) SupportedOSType() OSType {
 	return OSTypeLinux
 }
 
-func (c *complianceComponent) Objects() ([]runtime.Object, []runtime.Object) {
+func (c *complianceComponent) Objects() ([]client.Object, []client.Object) {
 	complianceObjs := append(
-		[]runtime.Object{createNamespace(ComplianceNamespace, c.openshift)},
+		[]client.Object{createNamespace(ComplianceNamespace, c.openshift)},
 		copyImagePullSecrets(c.pullSecrets, ComplianceNamespace)...,
 	)
 	complianceObjs = append(complianceObjs,
@@ -153,7 +154,7 @@ func (c *complianceComponent) Objects() ([]runtime.Object, []runtime.Object) {
 		complianceObjs = append(complianceObjs, secretsToRuntimeObjects(CopySecrets(ComplianceNamespace, c.managerInternalTLSSecret)...)...)
 	}
 
-	var objsToDelete []runtime.Object
+	var objsToDelete []client.Object
 	// Compliance server is only for Standalone or Management clusters
 	if c.managementClusterConnection == nil {
 		complianceObjs = append(complianceObjs, secretsToRuntimeObjects(c.complianceServerCertSecrets...)...)
@@ -166,7 +167,7 @@ func (c *complianceComponent) Objects() ([]runtime.Object, []runtime.Object) {
 		complianceObjs = append(complianceObjs,
 			c.complianceServerManagedClusterRole(),
 		)
-		objsToDelete = []runtime.Object{c.complianceServerDeployment()}
+		objsToDelete = []client.Object{c.complianceServerDeployment()}
 	}
 
 	if c.openshift {

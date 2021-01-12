@@ -21,19 +21,19 @@ import (
 	"strconv"
 	"strings"
 
-	operator "github.com/tigera/operator/api/v1"
-	operatorv1 "github.com/tigera/operator/api/v1"
-	"github.com/tigera/operator/pkg/common"
-	"github.com/tigera/operator/pkg/components"
-	"github.com/tigera/operator/pkg/controller/migration"
-
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	operator "github.com/tigera/operator/api/v1"
+	operatorv1 "github.com/tigera/operator/api/v1"
+	"github.com/tigera/operator/pkg/common"
+	"github.com/tigera/operator/pkg/components"
+	"github.com/tigera/operator/pkg/controller/migration"
 )
 
 const (
@@ -86,14 +86,14 @@ func (c *nodeComponent) SupportedOSType() OSType {
 	return OSTypeLinux
 }
 
-func (c *nodeComponent) Objects() ([]runtime.Object, []runtime.Object) {
-	objsToCreate := []runtime.Object{
+func (c *nodeComponent) Objects() ([]client.Object, []client.Object) {
+	objsToCreate := []client.Object{
 		c.nodeServiceAccount(),
 		c.nodeRole(),
 		c.nodeRoleBinding(),
 	}
 
-	var objsToDelete []runtime.Object
+	var objsToDelete []client.Object
 
 	if c.cr.Spec.Variant == operator.TigeraSecureEnterprise {
 		// Include Service for exposing node metrics.

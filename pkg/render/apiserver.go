@@ -17,16 +17,17 @@ package render
 import (
 	"fmt"
 
-	operator "github.com/tigera/operator/api/v1"
-	"github.com/tigera/operator/pkg/components"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	operator "github.com/tigera/operator/api/v1"
+	"github.com/tigera/operator/pkg/components"
 )
 
 const (
@@ -106,8 +107,8 @@ func (c *apiServerComponent) SupportedOSType() OSType {
 	return OSTypeLinux
 }
 
-func (c *apiServerComponent) Objects() ([]runtime.Object, []runtime.Object) {
-	objs := []runtime.Object{
+func (c *apiServerComponent) Objects() ([]client.Object, []client.Object) {
+	objs := []client.Object{
 		createNamespace(APIServerNamespace, c.openshift),
 	}
 	secrets := copyImagePullSecrets(c.pullSecrets, APIServerNamespace)
@@ -800,8 +801,8 @@ func (c *apiServerComponent) tolerations() []corev1.Toleration {
 	return tolerations
 }
 
-func (c *apiServerComponent) getTLSObjects() []runtime.Object {
-	objs := []runtime.Object{}
+func (c *apiServerComponent) getTLSObjects() []client.Object {
+	objs := []client.Object{}
 	for _, s := range c.tlsSecrets {
 		objs = append(objs, s)
 	}

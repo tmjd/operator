@@ -179,16 +179,16 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// the utils folder where the other watch logic is.
 	err = c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForObject{}, &predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			_, hasLabel := e.Meta.GetLabels()[tigeraElasticsearchUserSecretLabel]
-			return e.Meta.GetNamespace() == render.OperatorNamespace() && hasLabel
+			_, hasLabel := e.Object.GetLabels()[tigeraElasticsearchUserSecretLabel]
+			return e.Object.GetNamespace() == render.OperatorNamespace() && hasLabel
 		},
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			_, hasLabel := e.MetaNew.GetLabels()[tigeraElasticsearchUserSecretLabel]
-			return e.MetaNew.GetNamespace() == render.OperatorNamespace() && hasLabel
+			_, hasLabel := e.ObjectNew.GetLabels()[tigeraElasticsearchUserSecretLabel]
+			return e.ObjectNew.GetNamespace() == render.OperatorNamespace() && hasLabel
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			_, hasLabel := e.Meta.GetLabels()[tigeraElasticsearchUserSecretLabel]
-			return e.Meta.GetNamespace() == render.OperatorNamespace() && hasLabel
+			_, hasLabel := e.Object.GetLabels()[tigeraElasticsearchUserSecretLabel]
+			return e.Object.GetNamespace() == render.OperatorNamespace() && hasLabel
 		},
 	})
 	if err != nil {
@@ -299,11 +299,9 @@ func fillDefaults(opr *operatorv1.LogStorage) {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileLogStorage) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileLogStorage) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling LogStorage")
-
-	ctx := context.Background()
 
 	ls, err := GetLogStorage(ctx, r.client)
 	if err != nil {

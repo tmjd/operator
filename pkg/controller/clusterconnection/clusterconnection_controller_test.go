@@ -117,7 +117,7 @@ var _ = Describe("ManagementClusterConnection controller tests", func() {
 		By("reconciling with the required prerequisites")
 		err = c.Get(ctx, client.ObjectKey{Name: render.GuardianDeploymentName, Namespace: render.GuardianNamespace}, dpl)
 		Expect(err).To(HaveOccurred())
-		_, err = r.Reconcile(reconcile.Request{})
+		_, err = r.Reconcile(context.TODO(), reconcile.Request{})
 		Expect(err).ToNot(HaveOccurred())
 		err = c.Get(ctx, client.ObjectKey{Name: render.GuardianDeploymentName, Namespace: render.GuardianNamespace}, dpl)
 		// Verifying that there is a deployment is enough for the purpose of this test. More detailed testing will be done
