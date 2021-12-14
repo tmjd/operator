@@ -34,116 +34,66 @@ global_job_config:
     - 'cache restore go-mod-cache'
 
 blocks:
-  - name: 'Build'
-    dependencies: []
-    task:
-      jobs:
-        - name: Build
-          execution_time_limit:
-            minutes: 45
-          commands:
-            - make build
-            # Store in cache for other builds in this run
-            - 'cache store bin-${SEMAPHORE_GIT_SHA} build/_output/bin'
-            - 'cache store go-pkg-cache-${SEMAPHORE_GIT_SHA} .go-pkg-cache'
-            - 'cache store go-mod-cache-${SEMAPHORE_GIT_SHA} ${HOME}/go/pkg/mod/cache'
-            # Store in cache for subsequent runs
-            - cache store go-pkg-cache .go-pkg-cache
-            - 'cache store go-mod-cache ${HOME}/go/pkg/mod/cache'
-
-  - name: 'Static Checks'
-    dependencies: ["Build"]
-    task:
-      jobs:
-        - name: Static Checks
-          execution_time_limit:
-            minutes: 15
-          commands:
-            - make format-check
-            - make dirty-check
-
-  - name: 'Check generated files'
-    dependencies: ["Build"]
-    task:
-      jobs:
-        - name: Check generated files
-          execution_time_limit:
-            minutes: 15
-          commands:
-            # validate-gen-versions includes dirty-check
-            - make validate-gen-versions
-
-  - name: 'UT'
-    dependencies: ["Build"]
-    task:
-      jobs:
-        - name: Run UTs
-          execution_time_limit:
-            minutes: 25
-          commands:
-            - make ut
-
-  - name: 'FV'
-    dependencies: ["Build"]
-    task:
-      agent:
-        machine:
-          type: e1-standard-4
-          os_image: ubuntu1804
-      jobs:
-        - name: Run FVs
-          execution_time_limit:
-            minutes: 30
-          commands:
-            - make fv
-
-  - name: 'Push Image amd64 (non-PR builds only)'
+  - name: 'Build and Push amd64 Image on tag'
     execution_time_limit:
       minutes: 45
-    dependencies: ["Static Checks", "Check generated files", "UT", "FV"]
-    skip:
-      # Do not run PRs.
-      when: "pull_request != ''"
+    run:
+      # Only run on tags.
+      when: "tag =~ '.*'"
     task:
       jobs:
-        - name: Build push branch images
+        - name: Build and push amd64 images
           execution_time_limit:
             minutes: 45
           commands:
-            - export BRANCH_NAME=$SEMAPHORE_GIT_BRANCH
             - export ARCH=amd64
             - make images CONFIRM=true
             - make dirty-check
-            - make tag-push-image IMAGETAG=$BRANCH_NAME CONFIRM=true
+            - make tag-push-image IMAGETAG=$SEMAPHORE_GIT_TAG_NAME CONFIRM=true
       secrets:
         - name: quay-robot-semaphore_v2
       prologue:
         commands:
           - docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io;
 
-  - name: 'Push Image arm64 (non-PR builds only)'
+  - name: 'Build and Push arm64 Image on tag'
     execution_time_limit:
       minutes: 45
-    dependencies: ["Static Checks", "Check generated files", "UT", "FV"]
-    skip:
-      # Do not run PRs.
-      when: "pull_request != ''"
+    run:
+      # Only run on tags.
+      when: "tag =~ '.*'"
     task:
       jobs:
-        - name: Build and push arm64 images on branch
+        - name: Build and push arm64 images
           execution_time_limit:
             minutes: 45
           commands:
-            - export BRANCH_NAME=$SEMAPHORE_GIT_BRANCH
             - export ARCH=arm64
             - make images CONFIRM=true
             - make dirty-check
-            - make tag-push-image IMAGETAG=$BRANCH_NAME CONFIRM=true
+            - make tag-push-image IMAGETAG=$SEMAPHORE_GIT_TAG_NAME CONFIRM=true
       secrets:
         - name: quay-robot-semaphore_v2
       prologue:
         commands:
-          - docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io;
+          - docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io
+
+  - name: Push multi-arch manifests
+    dependencies: ["Build and Push amd64 Image on tag", "Build and Push arm64 Image on tag"]
+    run:
+      # Only run on tags.
+      when: "tag =~ '.*'"
+    task:
+      jobs:
+        - name: Push multi-arch manifests
+          commands:
+            - make push-manifests IMAGETAG=$SEMAPHORE_GIT_TAG_NAME
+      secrets:
+        - name: quay-robot-semaphore_v2
+      prologue:
+        commands:
+          - docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io
+
 
   - name: Build
     task:
@@ -179,50 +129,3 @@ blocks:
             - cache store go-pkg-cache .go-pkg-cache
             - 'cache store go-mod-cache ${HOME}/go/pkg/mod/cache'
 
-  - name: Build
-    task:
-      jobs:
-        - name: Build
-          commands:
-            - export BRANCH_NAME=$SEMAPHORE_GIT_BRANCH
-            - make ci
-            - >-
-              if [ -z "${SEMAPHORE_GIT_PR_NUMBER}" ]; then 
-                make cd CONFIRM=true;
-              fi
-            - >-
-              if [ -z "${SEMAPHORE_GIT_PR_NUMBER}" ]; then
-                make maybe-build-release;
-              fi
-      secrets:
-        - name: quay-robot-semaphore_v2
-        - name: operator-redhat-connect
-      prologue:
-        commands:
-          - >-
-            if [[ -v SEMAPHORE_GIT_PR_NUMBER ]]; then
-              unset QUAY_USERNAME QUAY_TOKEN; docker logout; docker logout quay.io;
-            else
-              docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io;
-            fi
-          - cache restore go-pkg-cache
-          - cache restore go-mod-cache
-      epilogue:
-        on_pass:
-          commands:
-            - cache store go-pkg-cache .go-pkg-cache
-            - 'cache store go-mod-cache ${HOME}/go/pkg/mod/cache'
-
-
-
-promotions:
-  # Run this manually via the semaphore UI if the cache is full
-  - name: Clear Cache
-    pipeline_file: clear_cache.yml
-  - name: Release operator
-    pipeline_file: release.yml
-    auto_promote:
-      # If the block has passed and the branch is for master or a release branch then run the pin updates. Note that
-      # this doesn't try to restrict which release branches, as the presence of this auto promotion code means that
-      # it can handle updating the pins in this fashion.
-      when: "(result = 'passed') and ((branch = 'master') or (branch =~ '^release-v\d*\.\d*')) and (tag =~ '^v\d*\.\d*\.\d"

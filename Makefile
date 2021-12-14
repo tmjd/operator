@@ -181,8 +181,7 @@ KUBECONFIG?=./kubeconfig.yaml
 fv: cluster-create run-fvs cluster-destroy
 run-fvs:
 	-mkdir -p .go-pkg-cache report
-	$(DOCKER_RUN) -e KUBECONFIG=$(KUBECONFIG) $(CALICO_BUILD) sh -c '$(GIT_CONFIG_SSH) \
-	echo "output $$(kubectl get pods -A)"; \
+	$(DOCKER_RUN) -e KUBECONFIG=/go/src/$(PACKAGE_NAME)/$(KUBECONFIG) $(CALICO_BUILD) sh -c '$(GIT_CONFIG_SSH) \
 	ginkgo -pkgdir test -r --skipPackage ./vendor,./pkg -focus="$(GINKGO_FOCUS)" $(GINKGO_ARGS) "$(WHAT)"'
 
 ut:
@@ -263,14 +262,14 @@ dirty-check:
 ###############################################################################
 .PHONY: ci
 ## Run what CI runs
-ci: clean format-check validate-gen-versions image-all test dirty-check test-crds
+ci: clean static-checks validate-gen-versions image-all test dirty-check test-crds
 
 validate-gen-versions:
 	make gen-versions
 	make dirty-check
 
 ## Deploys images to registry
-tag-push-image:
+tag-push-image: cd-arch-$(ARCH)
 ifndef CONFIRM
 	$(error CONFIRM is undefined - run using make <target> CONFIRM=true)
 endif
@@ -280,8 +279,8 @@ endif
 
 sub-cd-arch-% cd-arch-%:
 	$(MAKE) images ARCH=$*
-	$(MAKE) tag-images push IMAGETAG=${BRANCH_NAME} EXCLUDEARCH="$(EXCLUDEARCH)"
-	$(MAKE) tag-images push IMAGETAG=$(shell git describe --tags --dirty --always --long --abbrev=12) EXCLUDEARCH="$(EXCLUDEARCH)"
+	$(MAKE) tag-images push IMAGETAG=${BRANCH_NAME} ARCH="$*"
+	$(MAKE) tag-images push IMAGETAG=$(shell git describe --tags --dirty --always --long --abbrev=12) ARCH="$*"
 
 cd:
 ifndef CONFIRM
@@ -295,10 +294,6 @@ endif
 		sub-cd-arch-$$arch; \
 	done
 	$(MAKE) push-manifests  IMAGETAG=${BRANCH_NAME} EXCLUDEARCH="$(EXCLUDEARCH)"
-	$(MAKE) tag-images-all push-all push-manifests  IMAGETAG=${BRANCH_NAME} EXCLUDEARCH="$(EXCLUDEARCH)"
-
-	$(MAKE) tag-images-all push-all push-manifests  IMAGETAG=${BRANCH_NAME} EXCLUDEARCH="$(EXCLUDEARCH)"
-	$(MAKE) tag-images-all push-all push-manifests  IMAGETAG=$(shell git describe --tags --dirty --always --long --abbrev=12) EXCLUDEARCH="$(EXCLUDEARCH)"
 
 ###############################################################################
 # Release

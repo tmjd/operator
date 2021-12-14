@@ -68,8 +68,7 @@ blocks:
           execution_time_limit:
             minutes: 15
           commands:
-            - make format-check
-            - make dirty-check
+            - make static-checks
 
   - name: 'Check generated files'
     dependencies: ["Build"]
@@ -81,6 +80,7 @@ blocks:
           commands:
             # validate-gen-versions includes dirty-check
             - make validate-gen-versions
+            - make test-crds
 
   - name: 'UT'
     dependencies: ["Build"]
