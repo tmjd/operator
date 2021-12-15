@@ -376,15 +376,6 @@ func (d *dpiComponent) dpiClusterRole() *rbacv1.ClusterRole {
 	return role
 }
 
-func (d *dpiComponent) dpiNamespace() *corev1.Namespace {
-	return &corev1.Namespace{
-		TypeMeta: metav1.TypeMeta{Kind: "Namespace", APIVersion: "v1"},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: DeepPacketInspectionNamespace,
-		},
-	}
-}
-
 func (d *dpiComponent) dpiAnnotations() map[string]string {
 	if d.cfg.HasNoDPIResource || d.cfg.HasNoLicense {
 		return nil

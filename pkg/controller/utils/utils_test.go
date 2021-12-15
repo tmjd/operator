@@ -64,7 +64,7 @@ var _ = Describe("Utils elasticsearch license type tests", func() {
 		Expect(batchv1beta.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 		Expect(batchv1.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 
-		c = fake.NewFakeClientWithScheme(scheme)
+		c = fake.NewClientBuilder().WithScheme(scheme).Build()
 		ctx = context.Background()
 		log = logf.Log.WithName("utils-test-logger")
 	})
@@ -149,7 +149,7 @@ var _ = Describe("Utils APIServer type tests", func() {
 		Expect(batchv1beta.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 		Expect(batchv1.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 
-		c = fake.NewFakeClientWithScheme(scheme)
+		c = fake.NewClientBuilder().WithScheme(scheme).Build()
 		ctx = context.Background()
 		log = logf.Log.WithName("utils-test-logger")
 	})

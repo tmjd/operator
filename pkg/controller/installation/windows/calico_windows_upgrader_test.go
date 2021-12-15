@@ -67,7 +67,7 @@ var _ = Describe("Calico windows upgrader", func() {
 		Expect(operator.SchemeBuilder.AddToScheme(scheme)).NotTo(HaveOccurred())
 
 		// Create a client that will have a crud interface of k8s objects.
-		client = fake.NewFakeClientWithScheme(scheme)
+		client = fake.NewClientBuilder().WithScheme(scheme).Build()
 
 		cs = kfake.NewSimpleClientset()
 		mockStatus = &status.MockStatus{}

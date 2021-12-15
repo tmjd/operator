@@ -2,7 +2,6 @@ package logstorage
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -32,7 +31,6 @@ func (r *ReconcileLogStorage) createEsMetrics(
 		return reconcile.Result{}, false, err
 	} else if esMetricsSecret == nil {
 		r.status.SetDegraded("Waiting for elasticsearch metrics secrets to become available", "")
-		err = fmt.Errorf("waiting for elasticsearch metrics secrets to become available")
 		return reconcile.Result{}, false, nil
 	}
 
@@ -42,7 +40,6 @@ func (r *ReconcileLogStorage) createEsMetrics(
 		return reconcile.Result{}, false, err
 	} else if publicCertSecretESCopy == nil {
 		r.status.SetDegraded("Waiting for elasticsearch public cert secret to become available", "")
-		err = fmt.Errorf("waiting for elasticsearch public cert secret to become available")
 		return reconcile.Result{}, false, nil
 	}
 

@@ -145,7 +145,7 @@ func isDockerEE(ctx context.Context, c kubernetes.Interface) (bool, error) {
 		return false, err
 	}
 	for _, n := range masterNodes.Items {
-		for l, _ := range n.Labels {
+		for l := range n.Labels {
 			if strings.HasPrefix(l, "com.docker.ucp") {
 				return true, nil
 			}

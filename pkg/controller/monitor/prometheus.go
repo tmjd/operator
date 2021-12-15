@@ -143,7 +143,7 @@ func requiresPrometheusResources(client kubernetes.Interface) error {
 	return nil
 }
 
-func waitToAddPrometheusWatch(c controller.Controller, client kubernetes.Interface, log logr.Logger, readyFlag *utils.ReadyFlag) error {
+func waitToAddPrometheusWatch(c controller.Controller, client kubernetes.Interface, log logr.Logger, readyFlag *utils.ReadyFlag) {
 	const (
 		initBackoff   = 30 * time.Second
 		maxBackoff    = 8 * time.Minute
@@ -165,7 +165,7 @@ func waitToAddPrometheusWatch(c controller.Controller, client kubernetes.Interfa
 				log.Info(fmt.Sprintf("%v. monitor-controller will retry.", err))
 			} else {
 				readyFlag.MarkAsReady()
-				return nil
+				return
 			}
 		}
 

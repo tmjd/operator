@@ -67,21 +67,14 @@ var (
 	kbObjKey          = client.ObjectKey{Name: render.KibanaName, Namespace: render.KibanaNamespace}
 	curatorObjKey     = types.NamespacedName{Namespace: render.ElasticsearchNamespace, Name: render.EsCuratorName}
 
-	esCertSecretKey        = client.ObjectKey{Name: render.TigeraElasticsearchCertSecret, Namespace: render.ElasticsearchNamespace}
-	esCertSecretOperKey    = client.ObjectKey{Name: render.TigeraElasticsearchCertSecret, Namespace: common.OperatorNamespace()}
-	esCertPubSecretKey     = client.ObjectKey{Name: relasticsearch.PublicCertSecret, Namespace: render.ElasticsearchNamespace}
-	esCertPubSecretOperKey = client.ObjectKey{Name: relasticsearch.PublicCertSecret, Namespace: common.OperatorNamespace()}
+	esCertSecretKey     = client.ObjectKey{Name: render.TigeraElasticsearchCertSecret, Namespace: render.ElasticsearchNamespace}
+	esCertSecretOperKey = client.ObjectKey{Name: render.TigeraElasticsearchCertSecret, Namespace: common.OperatorNamespace()}
 
-	kbCertSecretKey        = client.ObjectKey{Name: render.TigeraKibanaCertSecret, Namespace: render.KibanaNamespace}
-	kbCertSecretOperKey    = client.ObjectKey{Name: render.TigeraKibanaCertSecret, Namespace: common.OperatorNamespace()}
-	kbCertPubSecretKey     = client.ObjectKey{Name: render.KibanaPublicCertSecret, Namespace: render.KibanaNamespace}
-	kbCertPubSecretOperKey = client.ObjectKey{Name: render.KibanaPublicCertSecret, Namespace: common.OperatorNamespace()}
+	kbCertSecretKey     = client.ObjectKey{Name: render.TigeraKibanaCertSecret, Namespace: render.KibanaNamespace}
+	kbCertSecretOperKey = client.ObjectKey{Name: render.TigeraKibanaCertSecret, Namespace: common.OperatorNamespace()}
 
-	esPublicCertObjMeta       = metav1.ObjectMeta{Name: relasticsearch.PublicCertSecret, Namespace: render.ElasticsearchNamespace}
-	kbPublicCertObjMeta       = metav1.ObjectMeta{Name: render.KibanaPublicCertSecret, Namespace: render.KibanaNamespace}
 	curatorUsrSecretObjMeta   = metav1.ObjectMeta{Name: render.ElasticsearchCuratorUserSecret, Namespace: common.OperatorNamespace()}
 	esMetricsUsrSecretObjMeta = metav1.ObjectMeta{Name: esmetrics.ElasticsearchMetricsSecret, Namespace: common.OperatorNamespace()}
-	operatorUsrSecretObjMeta  = metav1.ObjectMeta{Name: render.ElasticsearchOperatorUserSecret, Namespace: common.OperatorNamespace()}
 	storageClassName          = "test-storage-class"
 
 	esDNSNames         = dns.GetServiceDNSNames(render.ElasticsearchServiceName, render.ElasticsearchNamespace, dns.DefaultClusterDomain)
@@ -115,7 +108,7 @@ var _ = Describe("LogStorage controller", func() {
 		Expect(admissionv1beta1.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 
 		ctx = context.Background()
-		cli = fake.NewFakeClientWithScheme(scheme)
+		cli = fake.NewClientBuilder().WithScheme(scheme).Build()
 	})
 	Context("Reconcile", func() {
 		Context("Check default logstorage settings", func() {
@@ -443,7 +436,7 @@ var _ = Describe("LogStorage controller", func() {
 					Expect(cli.Create(ctx, &corev1.Secret{ObjectMeta: curatorUsrSecretObjMeta})).ShouldNot(HaveOccurred())
 
 					mockStatus.On("SetDegraded", "Waiting for elasticsearch metrics secrets to become available", "").Return()
-					result, err = r.Reconcile(ctx, reconcile.Request{})
+					_, err = r.Reconcile(ctx, reconcile.Request{})
 					Expect(err).ShouldNot(HaveOccurred())
 
 					Expect(cli.Create(ctx, &corev1.Secret{ObjectMeta: esMetricsUsrSecretObjMeta})).ShouldNot(HaveOccurred())
@@ -744,7 +737,7 @@ var _ = Describe("LogStorage controller", func() {
 					Expect(cli.Create(ctx, esAdminUserSecret)).ShouldNot(HaveOccurred())
 
 					mockStatus.On("SetDegraded", "Waiting for curator secrets to become available", "").Return()
-					result, err = r.Reconcile(ctx, reconcile.Request{})
+					_, err = r.Reconcile(ctx, reconcile.Request{})
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("confirming elasticsearch certs were updated and have the expected DNS names")
@@ -1601,18 +1594,14 @@ func setUpLogStorageComponents(cli client.Client, ctx context.Context, storageCl
 	Expect(cli.Create(ctx, ls)).ShouldNot(HaveOccurred())
 	createObj, _ := component.Objects()
 	for _, obj := range createObj {
-		switch obj.(type) {
+		switch obj := obj.(type) {
 		case *esv1.Elasticsearch:
 			By("setting the Elasticsearch status to operational so we pass the Elasticsearch ready check")
-			es := obj.(*esv1.Elasticsearch)
-			es.Status.Phase = esv1.ElasticsearchReadyPhase
-			obj = es
+			obj.Status.Phase = esv1.ElasticsearchReadyPhase
 
 		case *kbv1.Kibana:
 			By("setting the Kibana status to operational so we pass the Kibana ready check")
-			kb := obj.(*kbv1.Kibana)
-			kb.Status.AssociationStatus = cmnv1.AssociationEstablished
-			obj = kb
+			obj.Status.AssociationStatus = cmnv1.AssociationEstablished
 		}
 
 		Expect(cli.Create(ctx, obj)).ShouldNot(HaveOccurred())

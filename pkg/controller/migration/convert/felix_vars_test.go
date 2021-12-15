@@ -120,7 +120,7 @@ var _ = Describe("felix env parser", func() {
 
 			scheme := kscheme.Scheme
 			Expect(apis.AddToScheme(scheme)).ToNot(HaveOccurred())
-			c.client = fake.NewFakeClientWithScheme(scheme, emptyFelixConfig())
+			c.client = fake.NewClientBuilder().WithScheme(scheme).WithObjects(emptyFelixConfig()).Build()
 		})
 
 		It("sets a boolean", func() {

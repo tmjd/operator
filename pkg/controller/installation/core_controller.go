@@ -889,7 +889,7 @@ func (r *ReconcileInstallation) Reconcile(ctx context.Context, request reconcile
 	}
 
 	var managerInternalTLSSecret *corev1.Secret
-	managerInternalTLSSecret, err = utils.ValidateCertPair(r.client,
+	managerInternalTLSSecret, _ = utils.ValidateCertPair(r.client,
 		common.CalicoNamespace,
 		render.ManagerInternalTLSSecretName,
 		render.ManagerInternalSecretKeyName,
@@ -1318,10 +1318,7 @@ func readMTUFile() (int, error) {
 
 func calicoDirectoryExists() bool {
 	_, err := os.Stat("/var/lib/calico")
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func (r *ReconcileInstallation) SetDegraded(reason string, err error, log logr.Logger) {
@@ -1356,7 +1353,7 @@ func (r *ReconcileInstallation) GetTyphaNodeTLSConfig() (*render.TyphaNodeTLS, e
 			_, okCN := node.Data[render.CommonName]
 			_, okUS := node.Data[render.URISAN]
 			if !(okCN || okUS) {
-				errMsgs = append(errMsgs, fmt.Sprintf("CertPair for Felix does not contain common-name or uri-san"))
+				errMsgs = append(errMsgs, "CertPair for Felix does not contain common-name or uri-san")
 			}
 		}
 	}
@@ -1376,7 +1373,7 @@ func (r *ReconcileInstallation) GetTyphaNodeTLSConfig() (*render.TyphaNodeTLS, e
 			_, okCN := typha.Data[render.CommonName]
 			_, okUS := typha.Data[render.URISAN]
 			if !(okCN || okUS) {
-				errMsgs = append(errMsgs, fmt.Sprintf("CertPair for Typha does not contain common-name or uri-san"))
+				errMsgs = append(errMsgs, "CertPair for Typha does not contain common-name or uri-san")
 			}
 		}
 	}
@@ -1630,7 +1627,8 @@ func isOpenshiftOnAws(install *operator.Installation, ctx context.Context, clien
 	if err := client.Get(ctx, types.NamespacedName{Name: openshiftNetworkConfig}, &infra); err != nil {
 		return false, fmt.Errorf("Unable to read OpenShift infrastructure configuration: %s", err.Error())
 	}
-	return (infra.Status.Platform == "AWS"), nil
+	//Ignore this so we can continue checking infra.Status.Platform
+	return ((infra.Status.PlatformStatus.Type == "AWS") || (infra.Status.Platform == "AWS")), nil //nolint
 }
 
 func updateInstallationForOpenshiftNetwork(i *operator.Installation, o *configv1.Network) error {

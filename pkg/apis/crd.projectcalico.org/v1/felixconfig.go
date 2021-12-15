@@ -34,8 +34,8 @@ type AWSSrcDstCheckOption string
 
 const (
 	AWSSrcDstCheckOptionDoNothing AWSSrcDstCheckOption = "DoNothing"
-	AWSSrcDstCheckOptionEnable                         = "Enable"
-	AWSSrcDstCheckOptionDisable                        = "Disable"
+	AWSSrcDstCheckOptionEnable    AWSSrcDstCheckOption = "Enable"
+	AWSSrcDstCheckOptionDisable   AWSSrcDstCheckOption = "Disable"
 )
 
 // +kubebuilder:validation:Enum=DoNothing;Enable;Disable

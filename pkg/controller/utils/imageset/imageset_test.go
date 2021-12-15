@@ -41,7 +41,7 @@ var _ = Describe("imageset tests", func() {
 	Context("no imageset is fine", func() {
 		var c client.Client
 		BeforeEach(func() {
-			c = fake.NewFakeClientWithScheme(kscheme.Scheme)
+			c = fake.NewClientBuilder().WithScheme(kscheme.Scheme).Build()
 		})
 		It("should not error for Calico", func() {
 			e := ApplyImageSet(context.Background(), c, operator.Calico)
@@ -59,7 +59,7 @@ var _ = Describe("imageset tests", func() {
 			if v == operator.TigeraSecureEnterprise {
 				nm = fmt.Sprintf("enterprise-%s", components.EnterpriseRelease)
 			}
-			c := fake.NewFakeClientWithScheme(kscheme.Scheme,
+			c := fake.NewClientBuilder().WithScheme(kscheme.Scheme).WithObjects(
 				&operator.ImageSet{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: nm,
@@ -72,9 +72,9 @@ var _ = Describe("imageset tests", func() {
 						},
 					},
 				},
-			)
+			).Build()
 			Expect(ApplyImageSet(context.Background(), c, v)).To(BeNil())
-			c = fake.NewFakeClientWithScheme(kscheme.Scheme,
+			c = fake.NewClientBuilder().WithScheme(kscheme.Scheme).WithObjects(
 				&operator.ImageSet{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: nm,
@@ -88,11 +88,11 @@ var _ = Describe("imageset tests", func() {
 						},
 					},
 				},
-			)
+			).Build()
 			err := ApplyImageSet(context.Background(), c, v)
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(ContainSubstring("unexpected images"))
-			c = fake.NewFakeClientWithScheme(kscheme.Scheme,
+			c = fake.NewClientBuilder().WithScheme(kscheme.Scheme).WithObjects(
 				&operator.ImageSet{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: nm,
@@ -103,7 +103,7 @@ var _ = Describe("imageset tests", func() {
 						},
 					},
 				},
-			)
+			).Build()
 			err = ApplyImageSet(context.Background(), c, v)
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(ContainSubstring("bad digest images"))

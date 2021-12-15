@@ -68,8 +68,7 @@ func handleMTU(c *components, install *operatorv1.Installation) error {
 					component: ComponentCalicoNode,
 					fix:       fmt.Sprintf("adjust %s and %s to match or unset one of them", src, curMTUSrc)}
 			}
-			curMTU, curMTUSrc = mtu, "CNI_MTU"
-
+			curMTU = mtu
 		} else {
 			// user must have hardcoded their CNI instead of using the cni templating engine.
 			// use the hardcoded value.

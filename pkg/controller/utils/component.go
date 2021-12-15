@@ -316,37 +316,37 @@ func ensureOSSchedulingRestrictions(obj client.Object, osType rmeta.OSType) {
 	}
 
 	var podSpecs []*v1.PodSpec
-	switch obj.(type) {
+	switch obj := obj.(type) {
 	case *v1.PodTemplate:
-		podSpecs = []*v1.PodSpec{&obj.(*v1.PodTemplate).Template.Spec}
+		podSpecs = []*v1.PodSpec{&obj.Template.Spec}
 	case *apps.Deployment:
-		podSpecs = []*v1.PodSpec{&obj.(*apps.Deployment).Spec.Template.Spec}
+		podSpecs = []*v1.PodSpec{&obj.Spec.Template.Spec}
 	case *apps.DaemonSet:
-		podSpecs = []*v1.PodSpec{&obj.(*apps.DaemonSet).Spec.Template.Spec}
+		podSpecs = []*v1.PodSpec{&obj.Spec.Template.Spec}
 	case *apps.StatefulSet:
-		podSpecs = []*v1.PodSpec{&obj.(*apps.StatefulSet).Spec.Template.Spec}
+		podSpecs = []*v1.PodSpec{&obj.Spec.Template.Spec}
 	case *batchv1beta.CronJob:
-		podSpecs = []*v1.PodSpec{&obj.(*batchv1beta.CronJob).Spec.JobTemplate.Spec.Template.Spec}
+		podSpecs = []*v1.PodSpec{&obj.Spec.JobTemplate.Spec.Template.Spec}
 	case *batchv1.Job:
-		podSpecs = []*v1.PodSpec{&obj.(*batchv1.Job).Spec.Template.Spec}
+		podSpecs = []*v1.PodSpec{&obj.Spec.Template.Spec}
 	case *kbv1.Kibana:
-		podSpecs = []*v1.PodSpec{&obj.(*kbv1.Kibana).Spec.PodTemplate.Spec}
+		podSpecs = []*v1.PodSpec{&obj.Spec.PodTemplate.Spec}
 	case *esv1.Elasticsearch:
 		// elasticsearch resource describes multiple nodeSets which each have a nodeSelector.
-		nodeSets := obj.(*esv1.Elasticsearch).Spec.NodeSets
+		nodeSets := obj.Spec.NodeSets
 		for i := range nodeSets {
 			podSpecs = append(podSpecs, &nodeSets[i].PodTemplate.Spec)
 		}
 	case *monitoringv1.Alertmanager:
 		// Prometheus operator types don't have a template spec which is of v1.PodSpec type.
 		// We can't add it to the podSpecs list and assign osType in the for loop below.
-		podSpec := &obj.(*monitoringv1.Alertmanager).Spec
+		podSpec := &obj.Spec
 		podSpec.NodeSelector = map[string]string{"kubernetes.io/os": string(osType)}
 		return
 	case *monitoringv1.Prometheus:
 		// Prometheus operator types don't have a template spec which is of v1.PodSpec type.
 		// We can't add it to the podSpecs list and assign osType in the for loop below.
-		podSpec := &obj.(*monitoringv1.Prometheus).Spec
+		podSpec := &obj.Spec
 		podSpec.NodeSelector = map[string]string{"kubernetes.io/os": string(osType)}
 		return
 	default:

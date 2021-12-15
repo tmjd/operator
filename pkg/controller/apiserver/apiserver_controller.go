@@ -194,7 +194,7 @@ func (r *ReconcileAPIServer) Reconcile(ctx context.Context, request reconcile.Re
 		return reconcile.Result{}, err
 	}
 	if variant == "" {
-		r.status.SetDegraded(fmt.Sprintf("Waiting for Installation to be ready"), "")
+		r.status.SetDegraded("Waiting for Installation to be ready", "")
 		return reconcile.Result{}, nil
 	}
 	ns := rmeta.APIServerNamespace(variant)

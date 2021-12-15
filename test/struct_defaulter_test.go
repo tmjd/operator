@@ -7,13 +7,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type testStruct1 struct {
-	PrimitivesStruct
-	Struct    testInterfaceImpl
-	StructPtr *testInterfaceImpl
-	Interface testInterface
-}
-
 type testInterface interface {
 	TestFunc()
 }

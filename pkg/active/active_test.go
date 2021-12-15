@@ -52,7 +52,7 @@ var _ = Describe("test active pkg", func() {
 		Expect(batchv1beta.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 		Expect(batchv1.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 
-		c = fake.NewFakeClientWithScheme(scheme)
+		c = fake.NewClientBuilder().WithScheme(scheme).Build()
 		ctx = context.Background()
 		//log = logf.Log.WithName("active-test-logger")
 	})

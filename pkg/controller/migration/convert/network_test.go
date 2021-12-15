@@ -22,13 +22,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func ConfigList(x string) string {
-	return fmt.Sprintf(`{
-	"name": "k8s-pod-network",
-	"cniVersion": "0.3.1",
-	"plugins": [ ` + x + `] }`)
-}
-
 func int32Ptr(x int32) *int32 {
 	return &x
 }
@@ -58,7 +51,8 @@ var _ = Describe("Convert network tests", func() {
 				Value: "none",
 			})
 
-			c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(cfg).ToNot(BeNil())
@@ -76,7 +70,10 @@ var _ = Describe("Convert network tests", func() {
 			}, operatorv1.PluginGKE),
 		)
 		It("should convert AWS CNI install", func() {
-			c := fake.NewFakeClientWithScheme(scheme, append([]runtime.Object{pool, emptyFelixConfig(), getK8sNodes(6)}, awsCNIPolicyOnlyConfig()...)...)
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(pool, emptyFelixConfig()).
+				WithLists(getK8sNodes(6)).
+				WithRuntimeObjects(awsCNIPolicyOnlyConfig()...).Build()
 			_, err := Convert(ctx, c)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -90,18 +87,20 @@ var _ = Describe("Convert network tests", func() {
 				Value: "cidr=10.0.0.0/24,10.0.1.0/24",
 			})
 
-			c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(cfg).ToNot(BeNil())
 			Expect(cfg.Spec.CalicoNetwork.NodeAddressAutodetectionV4).NotTo(BeNil())
-			Expect(*&cfg.Spec.CalicoNetwork.NodeAddressAutodetectionV4.CIDRS).To(Equal([]string{"10.0.0.0/24", "10.0.1.0/24"}))
+			Expect(cfg.Spec.CalicoNetwork.NodeAddressAutodetectionV4.CIDRS).To(Equal([]string{"10.0.0.0/24", "10.0.1.0/24"}))
 		})
 	})
 
 	Describe("handle Calico CNI migration", func() {
 		It("migrate default", func() {
-			c := fake.NewFakeClientWithScheme(scheme, emptyNodeSpec(), emptyKubeControllerSpec(), pool, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(emptyNodeSpec(), emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(cfg).ToNot(BeNil())
@@ -116,7 +115,9 @@ var _ = Describe("Convert network tests", func() {
 				IPIPMode:    crdv1.IPIPModeAlways,
 				NATOutgoing: true,
 			}
-			c := fake.NewFakeClientWithScheme(scheme, append([]runtime.Object{pool, emptyFelixConfig()}, calicoDefaultConfig()...)...)
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(pool, emptyFelixConfig()).
+				WithRuntimeObjects(calicoDefaultConfig()...).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).NotTo(HaveOccurred())
 			var _1440 int32 = 1440
@@ -163,7 +164,8 @@ var _ = Describe("Convert network tests", func() {
 				Name:  "CALICO_NETWORKING_BACKEND",
 				Value: "none",
 			}}
-			c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(cfg).ToNot(BeNil())
@@ -181,7 +183,8 @@ var _ = Describe("Convert network tests", func() {
 				Name:  "CALICO_NETWORKING_BACKEND",
 				Value: "vxlan",
 			}}
-			c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(cfg).ToNot(BeNil())
@@ -200,7 +203,8 @@ var _ = Describe("Convert network tests", func() {
 					Name:  "CALICO_NETWORKING_BACKEND",
 					Value: backend,
 				}}
-				c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+				c := fake.NewClientBuilder().WithScheme(scheme).
+					WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 				_, err := Convert(ctx, c)
 				Expect(err).To(HaveOccurred())
 			},
@@ -217,7 +221,8 @@ var _ = Describe("Convert network tests", func() {
 				Name:  "CALICO_NETWORKING_BACKEND",
 				Value: "none",
 			}}
-			c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 			_, err := Convert(ctx, c)
 			Expect(err).To(HaveOccurred())
 		})
@@ -233,7 +238,8 @@ var _ = Describe("Convert network tests", func() {
 						Name:  "CALICO_NETWORKING_BACKEND",
 						Value: backend,
 					}}
-					c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+					c := fake.NewClientBuilder().WithScheme(scheme).
+						WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 					cfg, err := Convert(ctx, c)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(cfg).ToNot(BeNil())
@@ -255,7 +261,8 @@ var _ = Describe("Convert network tests", func() {
 						Name:  "CALICO_NETWORKING_BACKEND",
 						Value: "bird",
 					}}
-					c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+					c := fake.NewClientBuilder().WithScheme(scheme).
+						WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 					_, err := Convert(ctx, c)
 					Expect(err).NotTo(HaveOccurred())
 				},
@@ -289,7 +296,8 @@ var _ = Describe("Convert network tests", func() {
 						Name:  "CALICO_NETWORKING_BACKEND",
 						Value: "bird",
 					}}
-					c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+					c := fake.NewClientBuilder().WithScheme(scheme).
+						WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 					_, err := Convert(ctx, c)
 					Expect(err).To(HaveOccurred())
 				},
@@ -363,7 +371,8 @@ var _ = Describe("Convert network tests", func() {
 						Name:  "CALICO_NETWORKING_BACKEND",
 						Value: "bird",
 					}}
-					c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+					c := fake.NewClientBuilder().WithScheme(scheme).
+						WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 					_, err := Convert(ctx, c)
 					Expect(err).To(HaveOccurred())
 				},
@@ -405,7 +414,8 @@ var _ = Describe("Convert network tests", func() {
 						Name:  "CALICO_NETWORKING_BACKEND",
 						Value: "bird",
 					}}
-					c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+					c := fake.NewClientBuilder().WithScheme(scheme).
+						WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 					_, err := Convert(ctx, c)
 					Expect(err).NotTo(HaveOccurred())
 				},
@@ -447,7 +457,8 @@ var _ = Describe("Convert network tests", func() {
 						Name:  "CALICO_NETWORKING_BACKEND",
 						Value: "bird",
 					}}
-					c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+					c := fake.NewClientBuilder().WithScheme(scheme).
+						WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 					cfg, err := Convert(ctx, c)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(cfg).ToNot(BeNil())
@@ -492,7 +503,8 @@ var _ = Describe("Convert network tests", func() {
 						Name:  "CALICO_NETWORKING_BACKEND",
 						Value: "bird",
 					}}
-					c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+					c := fake.NewClientBuilder().WithScheme(scheme).
+						WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 					cfg, err := Convert(ctx, c)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(cfg).ToNot(BeNil())
@@ -531,7 +543,8 @@ var _ = Describe("Convert network tests", func() {
 					Name:  "CALICO_NETWORKING_BACKEND",
 					Value: "bird",
 				}}
-				c := fake.NewFakeClientWithScheme(scheme, ds, emptyKubeControllerSpec(), pool, emptyFelixConfig())
+				c := fake.NewClientBuilder().WithScheme(scheme).
+					WithObjects(ds, emptyKubeControllerSpec(), pool, emptyFelixConfig()).Build()
 				_, err := Convert(ctx, c)
 				Expect(err).To(HaveOccurred())
 			},

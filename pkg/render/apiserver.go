@@ -129,7 +129,6 @@ type apiServerComponent struct {
 	cfg              *APIServerConfiguration
 	tlsSecrets       []*corev1.Secret
 	tlsAnnotations   map[string]string
-	isManagement     bool
 	apiServerImage   string
 	queryServerImage string
 	certSignReqImage string
@@ -251,7 +250,6 @@ func (c *apiServerComponent) Objects() ([]client.Object, []client.Object) {
 	}
 
 	// Compile the final arrays based on the variant.
-	objsToCreate := []client.Object{}
 	if c.cfg.Installation.Variant == operatorv1.TigeraSecureEnterprise {
 		// Create any enterprise specific objects.
 		globalObjects = append(globalObjects, globalEnterpriseObjects...)
@@ -272,7 +270,7 @@ func (c *apiServerComponent) Objects() ([]client.Object, []client.Object) {
 		objsToDelete = append(objsToDelete, globalEnterpriseObjects...)
 	}
 
-	objsToCreate = append(globalObjects, namespacedObjects...)
+	objsToCreate := append(globalObjects, namespacedObjects...)
 	return objsToCreate, objsToDelete
 }
 

@@ -233,7 +233,8 @@ var _ = Describe("Defaulting logic tests", func() {
 				},
 			},
 		}
-		fillDefaults(instance)
+		err := fillDefaults(instance)
+		Expect(err).NotTo(HaveOccurred())
 		Expect(len(instance.Spec.CalicoNetwork.IPPools)).To(Equal(0))
 		Expect(validateCustomResource(instance)).NotTo(HaveOccurred())
 	})
@@ -485,8 +486,8 @@ var _ = Describe("Defaulting logic tests", func() {
 			err := fillDefaults(instance)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(*instance.Spec.CalicoNetwork.BGP).To(Equal(operator.BGPDisabled))
-			Expect(*&instance.Spec.CalicoNetwork.IPPools[0].Encapsulation).To(Equal(operator.EncapsulationVXLAN))
-			Expect(*&instance.Spec.CalicoNetwork.IPPools[0].CIDR).To(Equal("172.16.0.0/16"))
+			Expect(instance.Spec.CalicoNetwork.IPPools[0].Encapsulation).To(Equal(operator.EncapsulationVXLAN))
+			Expect(instance.Spec.CalicoNetwork.IPPools[0].CIDR).To(Equal("172.16.0.0/16"))
 			Expect(validateCustomResource(instance)).NotTo(HaveOccurred())
 		})
 	})

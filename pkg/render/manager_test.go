@@ -46,9 +46,6 @@ var _ = Describe("Tigera Secure Manager rendering tests", func() {
 	installation := &operatorv1.InstallationSpec{ControlPlaneReplicas: &replicas}
 	const expectedResourcesNumber = 11
 
-	expectedDNSNames := dns.GetServiceDNSNames(render.ManagerServiceName, render.ManagerNamespace, dns.DefaultClusterDomain)
-	expectedDNSNames = append(expectedDNSNames, "localhost")
-
 	It("should render all resources for a default configuration", func() {
 		resources := renderObjects(false, nil, installation, true)
 
@@ -523,10 +520,10 @@ var _ = Describe("Tigera Secure Manager rendering tests", func() {
 	It("should not render an user supplied manager TLS certificate", func() {
 
 		resources := renderObjects(false, nil, &operatorv1.InstallationSpec{}, true)
-		secret, ok := rtest.GetResource(resources, render.ManagerTLSSecretName, common.OperatorNamespace(), "", "v1", "Secret").(*corev1.Secret)
+		secret := rtest.GetResource(resources, render.ManagerTLSSecretName, common.OperatorNamespace(), "", "v1", "Secret")
 		Expect(secret).To(BeNil())
 
-		secret, ok = rtest.GetResource(resources, render.ManagerTLSSecretName, render.ManagerNamespace, "", "v1", "Secret").(*corev1.Secret)
+		secret, ok := rtest.GetResource(resources, render.ManagerTLSSecretName, render.ManagerNamespace, "", "v1", "Secret").(*corev1.Secret)
 		Expect(ok).To(BeTrue())
 		Expect(secret).ToNot(BeNil())
 	})

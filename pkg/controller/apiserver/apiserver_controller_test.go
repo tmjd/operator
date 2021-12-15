@@ -62,7 +62,7 @@ var _ = Describe("apiserver controller tests", func() {
 		Expect(rbacv1.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 
 		ctx = context.Background()
-		cli = fake.NewFakeClientWithScheme(scheme)
+		cli = fake.NewClientBuilder().WithScheme(scheme).Build()
 
 		// Set up a mock status
 		mockStatus = &status.MockStatus{}

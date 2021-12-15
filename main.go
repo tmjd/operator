@@ -254,7 +254,7 @@ func main() {
 
 	kubernetesVersion, err := common.GetKubernetesVersion(clientset)
 	if err != nil {
-		log.Error(err, fmt.Sprintf("Unable to resolve Kubernetes version, defaulting to v1.18"))
+		log.Error(err, "Unable to resolve Kubernetes version, defaulting to v1.18")
 		kubernetesVersion = &common.VersionInfo{Major: 1, Minor: 18}
 	}
 
@@ -347,7 +347,7 @@ func showCRDs(variant operatorv1.ProductVariant, outputType string) error {
 		}
 		first = false
 
-		fmt.Println(fmt.Sprintf("# %s", v.Name))
+		fmt.Printf("# %s\n", v.Name)
 		fmt.Println(string(b))
 	}
 	// Indicates nothing was printed so we couldn't find the requested outputType

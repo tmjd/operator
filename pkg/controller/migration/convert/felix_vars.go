@@ -84,7 +84,7 @@ func patchFromVal(key, val string) (patch, error) {
 		field := fc.Type().Field(ii)
 		value := fc.Field(ii)
 
-		if strings.ToLower(key) == strings.ToLower(field.Name) {
+		if strings.EqualFold(key, field.Name) {
 			fieldName := strings.Split(field.Tag.Get("json"), ",")[0]
 
 			v, err := convert(value.Interface(), val)

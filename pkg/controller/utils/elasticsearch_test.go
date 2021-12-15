@@ -21,12 +21,10 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 
-	"github.com/olivere/elastic/v7"
-
+	elastic "github.com/olivere/elastic/v7"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -96,7 +94,6 @@ var _ = Describe("Elasticsearch tests", func() {
 })
 
 type testRoundTripper struct {
-	u *url.URL
 	e error
 }
 

@@ -295,7 +295,7 @@ func (r *ReconcileManager) Reconcile(ctx context.Context, request reconcile.Requ
 	} else if tlsSecret != nil {
 		operatorManagedCertSecret, err = utils.IsCertOperatorIssued(tlsSecret.Data[render.ManagerInternalSecretCertName])
 		if err != nil {
-			r.status.SetDegraded(fmt.Sprintf("Error checking if manager TLS certificate is operator managed"), err.Error())
+			r.status.SetDegraded("Error checking if manager TLS certificate is operator managed", err.Error())
 			return reconcile.Result{}, err
 		}
 

@@ -59,7 +59,7 @@ var _ = Describe("ManagementClusterConnection controller tests", func() {
 		Expect(rbacv1.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 		err := operatorv1.SchemeBuilder.AddToScheme(scheme)
 		Expect(err).NotTo(HaveOccurred())
-		c = fake.NewFakeClientWithScheme(scheme)
+		c = fake.NewClientBuilder().WithScheme(scheme).Build()
 		ctx = context.Background()
 		mockStatus = &status.MockStatus{}
 		mockStatus.On("Run").Return()
@@ -91,7 +91,8 @@ var _ = Describe("ManagementClusterConnection controller tests", func() {
 				"key":  []byte("bar"),
 			},
 		}
-		c.Create(ctx, secret)
+		err = c.Create(ctx, secret)
+		Expect(err).NotTo(HaveOccurred())
 		pcSecret := &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      render.PacketCaptureCertSecret,
@@ -102,8 +103,9 @@ var _ = Describe("ManagementClusterConnection controller tests", func() {
 				"tls.key": []byte("bar"),
 			},
 		}
-		c.Create(ctx, pcSecret)
-		c.Create(ctx, &corev1.Secret{
+		err = c.Create(ctx, pcSecret)
+		Expect(err).NotTo(HaveOccurred())
+		err = c.Create(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      render.PrometheusTLSSecretName,
 				Namespace: common.OperatorNamespace(),
@@ -113,6 +115,7 @@ var _ = Describe("ManagementClusterConnection controller tests", func() {
 				"tls.key": []byte("bar"),
 			},
 		})
+		Expect(err).NotTo(HaveOccurred())
 
 		By("applying the required prerequisites")
 		// Create a ManagementClusterConnection in the k8s client.

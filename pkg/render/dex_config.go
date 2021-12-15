@@ -337,19 +337,14 @@ func (d *dexConfig) RequiredEnv(string) []corev1.EnvVar {
 			switch key {
 			case ClientIDSecretField:
 				env = append(env, corev1.EnvVar{Name: clientIDEnv, ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{Key: ClientIDSecretField, LocalObjectReference: corev1.LocalObjectReference{Name: d.idpSecret.Name}}}})
-				break
 			case ClientSecretSecretField:
 				env = append(env, corev1.EnvVar{Name: clientSecretEnv, ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{Key: ClientSecretSecretField, LocalObjectReference: corev1.LocalObjectReference{Name: d.idpSecret.Name}}}})
-				break
 			case adminEmailSecretField:
 				env = append(env, corev1.EnvVar{Name: googleAdminEmailEnv, ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{Key: adminEmailSecretField, LocalObjectReference: corev1.LocalObjectReference{Name: d.idpSecret.Name}}}})
-				break
 			case BindDNSecretField:
 				env = append(env, corev1.EnvVar{Name: bindDNEnv, ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{Key: BindDNSecretField, LocalObjectReference: corev1.LocalObjectReference{Name: d.idpSecret.Name}}}})
-				break
 			case BindPWSecretField:
 				env = append(env, corev1.EnvVar{Name: bindPWEnv, ValueFrom: &corev1.EnvVarSource{SecretKeyRef: &corev1.SecretKeySelector{Key: BindPWSecretField, LocalObjectReference: corev1.LocalObjectReference{Name: d.idpSecret.Name}}}})
-				break
 			}
 		}
 	}

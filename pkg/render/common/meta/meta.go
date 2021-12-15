@@ -64,7 +64,7 @@ func DefaultOperatorCASignerName() string {
 // is updated.
 func AnnotationHash(i interface{}) string {
 	h := sha1.New()
-	h.Write([]byte(fmt.Sprintf("%q", i)))
+	_, _ = h.Write([]byte(fmt.Sprintf("%q", i)))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 

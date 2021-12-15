@@ -68,7 +68,7 @@ func (r *ReconcileLogStorage) createEsKubeControllers(
 		enableESOIDCWorkaround = true
 	}
 
-	managerInternalTLSSecret, err := utils.ValidateCertPair(r.client,
+	managerInternalTLSSecret, _ := utils.ValidateCertPair(r.client,
 		common.CalicoNamespace,
 		render.ManagerInternalTLSSecretName,
 		render.ManagerInternalSecretKeyName,

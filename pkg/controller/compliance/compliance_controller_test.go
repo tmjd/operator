@@ -68,7 +68,7 @@ var _ = Describe("Compliance controller tests", func() {
 		Expect(operatorv1.SchemeBuilder.AddToScheme(scheme)).NotTo(HaveOccurred())
 
 		// Create a client that will have a crud interface of k8s objects.
-		c = fake.NewFakeClientWithScheme(scheme)
+		c = fake.NewClientBuilder().WithScheme(scheme).Build()
 		ctx = context.Background()
 
 		mockStatus = &status.MockStatus{}

@@ -89,7 +89,7 @@ var _ = Describe("CRD management tests", func() {
 				return fmt.Errorf("No nodes found")
 			}
 			for _, n := range nodes.Items {
-				for k, _ := range n.ObjectMeta.Annotations {
+				for k := range n.ObjectMeta.Annotations {
 					if strings.Contains(k, "projectcalico") {
 						delete(n.ObjectMeta.Annotations, k)
 					}

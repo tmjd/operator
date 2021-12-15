@@ -112,8 +112,7 @@ func (r *ReconcileLogStorage) createLogStorage(
 	var dexCfg render.DexRelyingPartyConfig
 	// If the authentication CR is available and it is not configured to use the Tigera OIDC type then configure dex.
 	if authentication != nil && (authentication.Spec.OIDC == nil || authentication.Spec.OIDC.Type != operatorv1.OIDCTypeTigera) {
-		var dexCertSecret *corev1.Secret
-		dexCertSecret = &corev1.Secret{}
+		dexCertSecret := &corev1.Secret{}
 		if err := r.client.Get(ctx, types.NamespacedName{Name: render.DexCertSecretName, Namespace: common.OperatorNamespace()}, dexCertSecret); err != nil {
 			r.status.SetDegraded("Failed to read dex tls secret", err.Error())
 			return reconcile.Result{}, false, finalizerCleanup, err

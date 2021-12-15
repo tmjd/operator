@@ -431,21 +431,19 @@ func WaitToAddResourceWatch(controller controller.Controller, client kubernetes.
 	ticker := time.NewTicker(duration)
 	defer ticker.Stop()
 	for {
-		select {
-		case <-ticker.C:
-			duration = duration * 2
-			if duration >= maxDuration {
-				duration = maxDuration
-			}
-			ticker.Reset(duration)
-			if isResourceReady(client, obj.GetObjectKind().GroupVersionKind().Kind) {
-				err := controller.Watch(&source.Kind{Type: obj}, &handler.EnqueueRequestForObject{})
-				if err != nil {
-					log.Info("failed to watch %s resource: %v. Will retry to add watch", obj.GetObjectKind().GroupVersionKind().Kind, err)
-				} else {
-					flag.MarkAsReady()
-					return
-				}
+		<-ticker.C
+		duration = duration * 2
+		if duration >= maxDuration {
+			duration = maxDuration
+		}
+		ticker.Reset(duration)
+		if isResourceReady(client, obj.GetObjectKind().GroupVersionKind().Kind) {
+			err := controller.Watch(&source.Kind{Type: obj}, &handler.EnqueueRequestForObject{})
+			if err != nil {
+				log.Info("failed to watch %s resource: %v. Will retry to add watch", obj.GetObjectKind().GroupVersionKind().Kind, err)
+			} else {
+				flag.MarkAsReady()
+				return
 			}
 		}
 	}

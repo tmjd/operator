@@ -90,7 +90,8 @@ var _ = Describe("Convert network tests", func() {
 				Name:  "CNI_NETWORK_CONFIG",
 				Value: `{"type": "calico", "name": "k8s-pod-network", "ipam": {"type": "calico-ipam"}}`,
 			}}
-			c := fake.NewFakeClientWithScheme(scheme, ds, v4pool1, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, v4pool1, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cfg.Spec.CalicoNetwork.IPPools).To(Equal([]operatorv1.IPPool{{
@@ -108,7 +109,8 @@ var _ = Describe("Convert network tests", func() {
 				{Name: "FELIX_IPTABLESMANGLEALLOWACTION", Value: "Return"},
 			}
 
-			c := fake.NewFakeClientWithScheme(scheme, ds, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, emptyFelixConfig()).Build()
 			_, err := Convert(ctx, c)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -122,7 +124,8 @@ var _ = Describe("Convert network tests", func() {
 				Name:  "CALICO_IPV4POOL_CIDR",
 				Value: envcidr,
 			}}
-			c := fake.NewFakeClientWithScheme(scheme, ds, v4pool1, v4pool2, v4pooldefault, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, v4pool1, v4pool2, v4pooldefault, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cfg.Spec.CalicoNetwork.IPPools).To(HaveLen(1))
@@ -144,7 +147,8 @@ var _ = Describe("Convert network tests", func() {
 				Name:  "CALICO_IPV6POOL_CIDR",
 				Value: envcidr,
 			}}
-			c := fake.NewFakeClientWithScheme(scheme, ds, v6pool1, v6pool2, v6pooldefault, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, v6pool1, v6pool2, v6pooldefault, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cfg.Spec.CalicoNetwork.IPPools).To(HaveLen(1))
@@ -162,7 +166,8 @@ var _ = Describe("Convert network tests", func() {
 				Value: `{"type": "calico", "name": "k8s-pod-network", "ipam": {"type": "calico-ipam"}}`,
 			}}
 			v4pool1.Spec.CIDR = "1.168.0/24"
-			c := fake.NewFakeClientWithScheme(scheme, ds, v4pool1)
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, v4pool1).Build()
 			_, err := Convert(ctx, c)
 			Expect(err).To(HaveOccurred())
 		})
@@ -178,7 +183,8 @@ var _ = Describe("Convert network tests", func() {
 				Value: "3.168.4.0/24",
 			}}
 			v4pooldefault.Spec.Disabled = true
-			c := fake.NewFakeClientWithScheme(scheme, ds, v4pooldefault, v4pool2, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, v4pooldefault, v4pool2, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cfg.Spec.CalicoNetwork.IPPools).To(HaveLen(1))
@@ -190,7 +196,8 @@ var _ = Describe("Convert network tests", func() {
 				Name:  "CNI_NETWORK_CONFIG",
 				Value: `{"type": "calico", "name": "k8s-pod-network", "ipam": {"type": "calico-ipam", "assign_ipv6":"true"}}`,
 			}}
-			c := fake.NewFakeClientWithScheme(scheme, ds, v4pool1, v6pool1, emptyFelixConfig())
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds, v4pool1, v6pool1, emptyFelixConfig()).Build()
 			cfg, err := Convert(ctx, c)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cfg.Spec.CalicoNetwork.IPPools).To(ConsistOf([]operatorv1.IPPool{{
@@ -220,7 +227,9 @@ var _ = Describe("Convert network tests", func() {
 				}
 				pools = append(pools, p)
 			}
-			c := fake.NewFakeClientWithScheme(scheme, append([]runtime.Object{ds}, pools...)...)
+			c := fake.NewClientBuilder().WithScheme(scheme).
+				WithObjects(ds).
+				WithRuntimeObjects(pools...).Build()
 			_, err := Convert(ctx, c)
 			Expect(err).To(HaveOccurred())
 		},

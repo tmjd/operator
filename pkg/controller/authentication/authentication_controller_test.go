@@ -63,7 +63,7 @@ var _ = Describe("authentication controller tests", func() {
 		Expect(rbacv1.SchemeBuilder.AddToScheme(scheme)).ShouldNot(HaveOccurred())
 
 		ctx = context.Background()
-		cli = fake.NewFakeClientWithScheme(scheme)
+		cli = fake.NewClientBuilder().WithScheme(scheme).Build()
 
 		// Set up a mock status
 		mockStatus = &status.MockStatus{}
@@ -283,6 +283,7 @@ var _ = Describe("authentication controller tests", func() {
 
 		if nameAttrEmpty {
 			err = cli.Get(ctx, client.ObjectKey{Name: auth.GetName()}, auth)
+			Expect(err).ToNot(HaveOccurred())
 			Expect(auth.Spec.LDAP.UserSearch.NameAttribute).To(Equal(defaultNameAttribute))
 		}
 	},

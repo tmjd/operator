@@ -612,7 +612,8 @@ func (m *statusManager) podsFailing(selector *metav1.LabelSelector, namespace st
 	if err != nil {
 		panic(err)
 	}
-	m.client.List(context.TODO(), &l, client.MatchingLabels(s), client.InNamespace(namespace))
+	// TODO: Handle this error, for now make static checks happy
+	_ = m.client.List(context.TODO(), &l, client.MatchingLabels(s), client.InNamespace(namespace))
 	for _, p := range l.Items {
 		if p.Status.Phase == corev1.PodFailed {
 			return fmt.Sprintf("Pod %s/%s has failed", p.Namespace, p.Name)

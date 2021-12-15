@@ -67,7 +67,7 @@ var _ = Describe("IntrusionDetection controller tests", func() {
 		Expect(operatorv1.SchemeBuilder.AddToScheme(scheme)).NotTo(HaveOccurred())
 
 		// Create a client that will have a crud interface of k8s objects.
-		c = fake.NewFakeClientWithScheme(scheme)
+		c = fake.NewClientBuilder().WithScheme(scheme).Build()
 		ctx = context.Background()
 
 		// Create an object we can use throughout the test to do the compliance reconcile loops.

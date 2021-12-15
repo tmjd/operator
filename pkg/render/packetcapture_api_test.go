@@ -365,8 +365,7 @@ var _ = Describe("Rendering tests for PacketCapture API component", func() {
 	})
 
 	It("should render all resources for an installation with oidc configured", func() {
-		var authentication *operatorv1.Authentication
-		authentication = &operatorv1.Authentication{
+		authentication := &operatorv1.Authentication{
 			Spec: operatorv1.AuthenticationSpec{
 				ManagerDomain: "https://127.0.0.1",
 				OIDC:          &operatorv1.AuthenticationOIDC{IssuerURL: "https://accounts.google.com", UsernameClaim: "email"}}}

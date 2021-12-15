@@ -74,7 +74,6 @@ var _ = Describe("Rendering tests", func() {
 		g = render.Guardian(cfg)
 		Expect(g.ResolveImages(nil)).To(BeNil())
 		resources, _ = g.Objects()
-		return
 	}
 
 	BeforeEach(func() {

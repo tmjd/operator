@@ -72,7 +72,7 @@ var _ = Describe("pkg/active with apiserver", func() {
 			ObjectMeta: metav1.ObjectMeta{Name: "calico-system"},
 			Spec:       corev1.NamespaceSpec{},
 		}
-		c.Delete(context.Background(), ns)
+		_ = c.Delete(context.Background(), ns)
 		// Validate the calico-system namespace is deleted using an unstructured type.
 		// This hits the API server directly instead of using the client cache.
 		// This should help with flaky tests.

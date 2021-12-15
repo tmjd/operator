@@ -60,9 +60,7 @@ const (
 )
 
 var (
-	preOperatorNodeLabel = map[string]string{nodeSelectorKey: nodeSelectorValuePre}
-	migratedNodeLabel    = map[string]string{nodeSelectorKey: nodeSelectorValuePost}
-	calicoPodLabel       = map[string]string{"k8s-app": "calico-node"}
+	migratedNodeLabel = map[string]string{nodeSelectorKey: nodeSelectorValuePost}
 )
 
 type NamespaceMigration interface {
@@ -85,7 +83,7 @@ type CoreNamespaceMigration struct {
 // It checks the following in the kube-system namespace:
 // calico-kube-controllers deployment, typha deployment, or calico-node deployment
 func (m *CoreNamespaceMigration) NeedsCoreNamespaceMigration(ctx context.Context) (bool, error) {
-	if m.migrationComplete == true {
+	if m.migrationComplete {
 		return false, nil
 	}
 
@@ -714,18 +712,4 @@ func (m *CoreNamespaceMigration) removeNodeLabel(ctx context.Context, nodeName, 
 		// no update needed
 		return true, nil
 	})
-}
-
-// isPodRunningAndReady returns true if the passed in pod is ready.
-func isPodRunningAndReady(pod v1.Pod) bool {
-	if pod.Status.Phase != v1.PodRunning {
-		return false
-	}
-	for _, c := range pod.Status.Conditions {
-		if c.Type == v1.PodReady && c.Status == v1.ConditionTrue {
-			return true
-		}
-	}
-
-	return false
 }
