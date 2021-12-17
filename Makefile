@@ -134,7 +134,7 @@ image: build $(OPERATOR_IMAGE)
 
 $(OPERATOR_IMAGE): $(OPERATOR_IMAGE)-$(ARCH)
 $(OPERATOR_IMAGE)-$(ARCH): register $(BINDIR)/operator-$(ARCH)
-	docker build --pull -t $(OPERATOR_IMAGE):latest-$(ARCH) --platform=linux/$(TARGET_PLATFORM) --build-arg GIT_VERSION=$(GIT_VERSION) -f ./build/Dockerfile.$(ARCH) .
+	docker build --pull -t $(OPERATOR_IMAGE):latest-$(ARCH) --platform=linux/$(TARGET_PLATFORM) --build-arg GIT_VERSION=$(GIT_VERSION) -f ./docker-image/Dockerfile.$(ARCH) .
 ifeq ($(ARCH),amd64)
 	docker tag $(OPERATOR_IMAGE):latest-$(ARCH) $(OPERATOR_IMAGE):latest
 endif

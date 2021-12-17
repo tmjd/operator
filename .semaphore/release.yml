@@ -95,37 +95,37 @@ blocks:
           - docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io
 
 
-  - name: Build
-    task:
-      jobs:
-        - name: Build
-          commands:
-            - export BRANCH_NAME=$SEMAPHORE_GIT_BRANCH
-            - make ci
-            - >-
-              if [ -z "${SEMAPHORE_GIT_PR_NUMBER}" ]; then 
-                make cd CONFIRM=true;
-              fi
-            - >-
-              if [ -z "${SEMAPHORE_GIT_PR_NUMBER}" ]; then
-                make maybe-build-release;
-              fi
-      secrets:
-        - name: quay-robot-semaphore_v2
-        - name: operator-redhat-connect
-      prologue:
-        commands:
-          - >-
-            if [[ -v SEMAPHORE_GIT_PR_NUMBER ]]; then
-              unset QUAY_USERNAME QUAY_TOKEN; docker logout; docker logout quay.io;
-            else
-              docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io;
-            fi
-          - cache restore go-pkg-cache
-          - cache restore go-mod-cache
-      epilogue:
-        on_pass:
-          commands:
-            - cache store go-pkg-cache .go-pkg-cache
-            - 'cache store go-mod-cache ${HOME}/go/pkg/mod/cache'
+            #- name: Build
+            #  task:
+            #    jobs:
+            #      - name: Build
+            #        commands:
+            #          - export BRANCH_NAME=$SEMAPHORE_GIT_BRANCH
+            #          - make ci
+            #          - >-
+            #            if [ -z "${SEMAPHORE_GIT_PR_NUMBER}" ]; then 
+            #              make cd CONFIRM=true;
+            #            fi
+            #          - >-
+            #            if [ -z "${SEMAPHORE_GIT_PR_NUMBER}" ]; then
+            #              make maybe-build-release;
+            #            fi
+            #    secrets:
+            #      - name: quay-robot-semaphore_v2
+            #      - name: operator-redhat-connect
+            #    prologue:
+            #      commands:
+            #        - >-
+            #          if [[ -v SEMAPHORE_GIT_PR_NUMBER ]]; then
+            #            unset QUAY_USERNAME QUAY_TOKEN; docker logout; docker logout quay.io;
+            #          else
+            #            docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io;
+            #          fi
+            #        - cache restore go-pkg-cache
+            #        - cache restore go-mod-cache
+            #    epilogue:
+            #      on_pass:
+            #        commands:
+            #          - cache store go-pkg-cache .go-pkg-cache
+            #          - 'cache store go-mod-cache ${HOME}/go/pkg/mod/cache'
 
