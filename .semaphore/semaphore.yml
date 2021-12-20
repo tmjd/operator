@@ -188,4 +188,4 @@ promotions:
     pipeline_file: release.yml
     auto_promote:
       # If the block has passed and the branch is for master or a release branch and on a tag then release.
-      when: "(result = 'passed') and ((branch = 'master') or (branch =~ '^release-v\d*\.\d*')) and (tag =~ '^v\d*\.\d*\.\d"
+      when: "(result = 'passed') and ((branch = 'master') or (branch =~ '^release-v\d*\.\d*')) and (tag =~ '^v\d*\.\d*\.\d')"
