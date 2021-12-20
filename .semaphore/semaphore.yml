@@ -115,7 +115,7 @@ blocks:
     dependencies: ["Static Checks", "Check generated files", "UT", "FV"]
     skip:
       # Do not run on PRs.
-      when: "pull_request != ''"
+      when: "pull_request =~ '.*'"
     task:
       jobs:
         - name: Build push branch images
@@ -139,7 +139,7 @@ blocks:
     dependencies: ["Static Checks", "Check generated files", "UT", "FV"]
     skip:
       # Do not run PRs.
-      when: "pull_request != ''"
+      when: "pull_request =~ '.*'"
     task:
       jobs:
         - name: Build and push arm64 images on branch
@@ -161,7 +161,7 @@ blocks:
     dependencies: ["Build and Push amd64 Image (non-PR builds only)", "Build and Push arm64 Image (non-PR builds only)"]
     skip:
       # Do not run PRs.
-      when: "pull_request != ''"
+      when: "pull_request =~ '.*'"
     task:
       jobs:
         - name: Push multi-arch manifests
