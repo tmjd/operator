@@ -12,7 +12,7 @@ SEMAPHORE_PROJECT_ID=$(SEMAPHORE_OPERATOR_PROJECT_ID)
 
 # Makefile configuration options
 OPERATOR_IMAGE  ?=operator
-RELEASE_REGISTRIES      ?=quay.io/tigera
+RELEASE_REGISTRIES      ?=quay.io/tmjd
 DEV_REGISTRIES          ?=$(RELEASE_REGISTRIES)
 RELEASE_BRANCH_PREFIX ?= release
 DEV_TAG_SUFFIX        ?= 0.dev
