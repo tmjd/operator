@@ -207,6 +207,7 @@ cluster-create: $(BINDIR)/kubectl $(BINDIR)/kind
 
 	# Wait for controller manager to be running and healthy.
 	while ! KUBECONFIG=$(KUBECONFIG) $(BINDIR)/kubectl get serviceaccount default; do echo "Waiting for default serviceaccount to be created..."; sleep 2; done
+	$(MAKE) cluster-load-images
 
 ## Deploy CRDs needed for UTs.  CRDs needed by ECK that we don't use are not deployed.
 deploy-crds: kubectl
@@ -220,6 +221,33 @@ deploy-crds: kubectl
 
 create-tigera-operator-namespace: kubectl
 	KUBECONFIG=$(KUBECONFIG) $(BINDIR)/kubectl create ns tigera-operator
+
+cluster-load-images: $(BINDIR)/kind
+	$(eval KUBECONTROLLER := $(shell $(DOCKER_GO_BUILD) \
+	bash -c '$(GIT_CONFIG_SSH) \
+	yq r config/calico_versions.yml components.calico/kube-controllers.version'))
+	$(eval TYPHA := $(shell $(DOCKER_GO_BUILD) \
+	bash -c '$(GIT_CONFIG_SSH) \
+	yq r config/calico_versions.yml components.typha.version'))
+	$(eval NODE := $(shell $(DOCKER_GO_BUILD) \
+	bash -c '$(GIT_CONFIG_SSH) \
+	yq r config/calico_versions.yml components.calico/node.version'))
+	$(eval FLEXVOL := $(shell $(DOCKER_GO_BUILD) \
+	bash -c '$(GIT_CONFIG_SSH) \
+	yq r config/calico_versions.yml components.flexvol.version'))
+	$(eval CNI := $(shell $(DOCKER_GO_BUILD) \
+	bash -c '$(GIT_CONFIG_SSH) \
+	yq r config/calico_versions.yml components.calico/cni.version'))
+	docker pull calico/pod2daemon-flexvol:$(FLEXVOL)
+	docker pull calico/node:$(NODE)
+	docker pull calico/typha:$(TYPHA)
+	docker pull calico/kube-controllers:$(KUBECONTROLLER)
+	docker pull calico/cni:$(CNI)
+	$(BINDIR)/kind load docker-image calico/cni:$(CNI)
+	$(BINDIR)/kind load docker-image calico/pod2daemon-flexvol:$(FLEXVOL)
+	$(BINDIR)/kind load docker-image calico/node:$(NODE)
+	$(BINDIR)/kind load docker-image calico/typha:$(TYPHA)
+	$(BINDIR)/kind load docker-image calico/kube-controllers:$(KUBECONTROLLER)
 
 ## Destroy local kind cluster
 cluster-destroy: $(BINDIR)/kubectl $(BINDIR)/kind
