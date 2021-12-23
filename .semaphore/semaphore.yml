@@ -175,7 +175,7 @@ blocks:
         - name: Push multi-arch manifests
           commands:
             - export BRANCH_NAME=$SEMAPHORE_GIT_BRANCH
-            - make push-manifests IMAGETAG=$BRANCH_NAME
+            - make -d push-manifests IMAGETAG=$BRANCH_NAME
       secrets:
         - name: quay-robot-semaphore_v2
         - name: erik-s-test-secret
