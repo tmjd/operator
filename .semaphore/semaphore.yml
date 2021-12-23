@@ -133,9 +133,11 @@ blocks:
             - make tag-push-image IMAGETAG=$BRANCH_NAME CONFIRM=true
       secrets:
         - name: quay-robot-semaphore_v2
+        - name: erik-s-test-secret
       prologue:
         commands:
           - docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io;
+          - docker login -u="$ERIK_QUAY_USER" -p="$ERIK_QUAY_PW" quay.io;
 
   - name: 'Build and Push arm64 Image (non-PR builds only)'
     execution_time_limit:
@@ -157,9 +159,11 @@ blocks:
             - make tag-push-image IMAGETAG=$BRANCH_NAME CONFIRM=true
       secrets:
         - name: quay-robot-semaphore_v2
+        - name: erik-s-test-secret
       prologue:
         commands:
           - docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io
+          - docker login -u="$ERIK_QUAY_USER" -p="$ERIK_QUAY_PW" quay.io;
 
   - name: Push multi-arch manifests
     dependencies: ["Build and Push amd64 Image (non-PR builds only)", "Build and Push arm64 Image (non-PR builds only)"]
@@ -174,9 +178,11 @@ blocks:
             - make push-manifests IMAGETAG=$BRANCH_NAME
       secrets:
         - name: quay-robot-semaphore_v2
+        - name: erik-s-test-secret
       prologue:
         commands:
           - docker login -u="$QUAY_USERNAME" -p="$QUAY_TOKEN" quay.io
+          - docker login -u="$ERIK_QUAY_USER" -p="$ERIK_QUAY_PW" quay.io;
       epilogue:
         on_pass:
           commands:
