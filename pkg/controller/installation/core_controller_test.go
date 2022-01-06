@@ -890,6 +890,7 @@ var _ = Describe("Testing core-controller installation", func() {
 
 			// Create a client that will have a crud interface of k8s objects.
 			c = fake.NewClientBuilder().WithScheme(scheme).Build()
+			By("Initializing with cancelable context")
 			ctx, cancel = context.WithCancel(context.Background())
 
 			// Create a fake clientset for the autoscaler.
@@ -943,6 +944,7 @@ var _ = Describe("Testing core-controller installation", func() {
 
 			nodeIndexInformer := cache.NewSharedIndexInformer(nlw, &corev1.Node{}, 0, cache.Indexers{})
 
+			By("Running node index informer")
 			go nodeIndexInformer.Run(ctx.Done())
 			for nodeIndexInformer.HasSynced() {
 				time.Sleep(100 * time.Millisecond)
@@ -965,7 +967,9 @@ var _ = Describe("Testing core-controller installation", func() {
 				migrationChecked:      true,
 			}
 
+			By("starting typha autoscaler")
 			r.typhaAutoscaler.start(ctx)
+			By("starting windows upgrader")
 			r.calicoWindowsUpgrader.Start(ctx)
 
 			// We start off with a 'standard' installation, with nothing special
@@ -977,6 +981,7 @@ var _ = Describe("Testing core-controller installation", func() {
 					CertificateManagement: &operator.CertificateManagement{},
 				},
 			}
+			By("finished test preparation")
 		})
 		AfterEach(func() {
 			cancel()
