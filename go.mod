@@ -21,7 +21,7 @@ require (
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.52.1
 	github.com/r3labs/diff/v2 v2.15.1
 	github.com/stretchr/testify v1.8.1
-	github.com/tigera/api v0.0.0-20230127214146-13f7c6ab995a
+	github.com/tigera/api v0.0.0-20230202010802-0dea22c33f64
 	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.4.0
 	gopkg.in/inf.v0 v0.9.1
@@ -39,6 +39,8 @@ require (
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible // Required by OLM
 	github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v1.0.1
+
+	github.com/tigera/api => github.com/tmjd/api v0.0.0-20230202010802-0dea22c33f64
 
 	// Scanners flag anything less than v0.3.8 as having a CVE.
 	golang.org/x/text => golang.org/x/text v0.4.0
